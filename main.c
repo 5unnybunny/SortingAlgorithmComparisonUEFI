@@ -84,10 +84,8 @@ EFI_STATUS
 EFIAPI
 efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 
-	//initialisation
-	#if defined(_GNU_EFI)
 	InitializeLib(ImageHandle, SystemTable);
-	#endif
+	
 	srand(rdtsc());
 	uint64_t tick;
 	uefi_call_wrapper(ST->ConOut->ClearScreen, 1, ST->ConOut);
@@ -95,7 +93,6 @@ efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 	UINTN size = rand();
 	
 	Print(L"Results for %d sized array\n", size);
-	//initialise array
 	int arr[size];
 	
 	//bubblesort
