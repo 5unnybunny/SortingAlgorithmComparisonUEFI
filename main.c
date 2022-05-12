@@ -2,7 +2,7 @@
 #include <efilib.h>
 
 
-//ALGORITHMS
+
 static unsigned long int next = 1;
 
 
@@ -75,51 +75,106 @@ void quicksort(int *A, int len) {
 	quicksort(A, i);
 	quicksort(A + i, len - i);
 }
-//END OF ALGORITHMS
 
 
 
-//EFI
 EFI_STATUS
 EFIAPI
 efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
-
 	InitializeLib(ImageHandle, SystemTable);
-	
-	srand(rdtsc());
-	uint64_t tick;
+	EFI_TIME* time;
+	UINTN Hours;
+	UINTN Minutes;
+	UINTN Seconds;
 	uefi_call_wrapper(ST->ConOut->ClearScreen, 1, ST->ConOut);
-
+	uint64_t tick;
+	srand(rdtsc());
 	UINTN size = rand();
 	
-	Print(L"Results for %d sized array\n", size);
+	tick = rdtsc();
+	uefi_call_wrapper(BS->Stall, 1, 1000000);
+	uint64_t TPS = rdtsc()-tick;
+	Print(L"Ticks Per Second: %lu\n", TPS);
+	Print(L"Results for %u sized array\n", size);
 	int arr[size];
 	
 	//bubblesort
 	for(int i=0; i<size; i++){
 		arr[i] = rand();
 	}
-	
+	uefi_call_wrapper(RT->GetTime, 2, time, NULL);
 	tick = rdtsc();
 	bubble_sort(arr, size);
-	Print(L"Bubblesort cycles: %ld\n", rdtsc()-tick);
+	Print(L"Bubble Sort ticks: %lu\n", rdtsc()-tick);
+	Hours = time->Hour;
+	Minutes = time->Minute;
+	Seconds = time->Second;
+	uefi_call_wrapper(RT->GetTime, 2, time, NULL);
+	if(Hours>time->Hour)
+		Hours = 24 + time->Hour - Hours;
+	else
+		Hours = time->Hour - Hours;
+	if(Minutes>time->Minute)
+		Minutes = 60 + time->Minute - Minutes;
+	else
+		Minutes = time->Minute - Minutes;
+	if(Seconds > time->Second)
+		Seconds = 60 + time->Second - Seconds;
+	else
+		Seconds = time->Second - Seconds;
+	Print(L"Bubble Sort time: H:%u M:%u S:%u\n", Hours, Minutes, Seconds);
 	
 	//insertsort
 	for(int i=0; i<size; i++){
 		arr[i] = rand();
 	}
+	uefi_call_wrapper(RT->GetTime, 2, time, NULL);
 	tick = rdtsc();
 	insertion_sort(arr, size);
-	Print(L"Insertion Sort cycles: %ld\n", rdtsc()-tick);
-	
+	Print(L"Insertion Sort ticks: %lu\n", rdtsc()-tick);
+	Hours = time->Hour;
+	Minutes = time->Minute;
+	Seconds = time->Second;
+	uefi_call_wrapper(RT->GetTime, 2, time, NULL);
+	if(Hours>time->Hour)
+		Hours = 24 + time->Hour - Hours;
+	else
+		Hours = time->Hour - Hours;
+	if(Minutes>time->Minute)
+		Minutes = 60 + time->Minute - Minutes;
+	else
+		Minutes = time->Minute - Minutes;
+	if(Seconds > time->Second)
+		Seconds = 60 + time->Second - Seconds;
+	else
+		Seconds = time->Second - Seconds;
+	Print(L"Insertion Sort time: H:%u M:%u S:%u\n", Hours, Minutes, Seconds);
 	
 	//quicksort
 	for(int i=0; i<size; i++){
 		arr[i] = rand();
 	}
+	uefi_call_wrapper(RT->GetTime, 2, time, NULL);
 	tick = rdtsc();
 	quicksort(arr, size);
-	Print(L"Quicksort cycles: %ld\n", rdtsc()-tick);
-
+	Print(L"Quicksort ticks: %lu\n", rdtsc()-tick);
+	Hours = time->Hour;
+	Minutes = time->Minute;
+	Seconds = time->Second;
+	uefi_call_wrapper(RT->GetTime, 2, time, NULL);
+	if(Hours>time->Hour)
+		Hours = 24 + time->Hour - Hours;
+	else
+		Hours = time->Hour - Hours;
+	if(Minutes>time->Minute)
+		Minutes = 60 + time->Minute - Minutes;
+	else
+		Minutes = time->Minute - Minutes;
+	if(Seconds > time->Second)
+		Seconds = 60 + time->Second - Seconds;
+	else
+		Seconds = time->Second - Seconds;
+	Print(L"Quicksort time: H:%u M:%u S:%u\n", Hours, Minutes, Seconds);
+	
 	return EFI_SUCCESS;
 }
