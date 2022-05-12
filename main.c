@@ -91,10 +91,13 @@ efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 	srand(rdtsc());
 	UINTN size = rand();
 	
+	//GetTime nanoseconds doesn't work on all hardware hence TPS, which can be used to obtain desired time from ticks
 	tick = rdtsc();
 	uefi_call_wrapper(BS->Stall, 1, 1000000);
 	uint64_t TPS = rdtsc()-tick;
+	uint64_t TPNS = TPS/1000000000;
 	Print(L"Ticks Per Second: %lu\n", TPS);
+	Print(L"Ticks Per NanoSecond: %lu.%lu\n", TPNS, TPS-TPNS*1000000000);
 	Print(L"Results for %u sized array\n", size);
 	int arr[size];
 	
