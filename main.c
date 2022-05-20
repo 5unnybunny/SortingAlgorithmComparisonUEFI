@@ -6,9 +6,9 @@ static unsigned long int next = 1;
 
 
 uint64_t rdtsc(){
-	unsigned int lo,hi;
-	__asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
-	return ((uint64_t)hi << 32) | lo;
+   uint32_t hi, lo;
+   __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
+   return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
 }
 
 
@@ -53,7 +53,6 @@ void insertion_sort(int *a, const int n) {
 }
  
 
-
 void quicksort(int *A, int len) {
 	if (len < 2) return;
  
@@ -75,8 +74,9 @@ void quicksort(int *A, int len) {
 	quicksort(A + i, len - i);
 }
 
-int pow_pos(int base, unsigned int exponent){
-	int j = base;
+
+int pow_pos(unsigned int base, unsigned int exponent){
+	unsigned int j = base;
 	if(exponent>1){
 		for(int i = exponent; i>1; --i)
 			j = j*base;
@@ -88,26 +88,27 @@ int pow_pos(int base, unsigned int exponent){
 EFI_STATUS
 EFIAPI
 efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
-	INTN Argc;
-	CHAR16 **Argv;	
+	CHAR16 **Argv;
+	EFI_TIME* time = NULL;
 	
 	InitializeLib(ImageHandle, SystemTable);
-	Argc = GetShellArgcArgv(ImageHandle, &Argv);
+	GetShellArgcArgv(ImageHandle, &Argv);
 	
 	uefi_call_wrapper(ST->ConOut->ClearScreen, 1, ST->ConOut);
 	uint64_t tick;
-	srand(rdtsc());
+	uefi_call_wrapper(RT->GetTime, 2, time, NULL);
+	srand(time->Hour * time->Minute * time->Second * rdtsc());
 	
 	UINTN inputsize;
 	for(inputsize = 0; Argv[1][inputsize] != '\0'; ++inputsize);
 	
 	UINTN size = 0;
 	for(int i = inputsize-1; i>=0; --i){
-			size = size + (pow_pos(10, inputsize-i) * ((int)(Argv[1][i] - '0')));
+		size = size + (pow_pos(10, inputsize-i) * ((unsigned int)(Argv[1][i] - '0')));
 	}
 	size = size/10;
 	
-	//GetTime nanoseconds doesn't work on all hardware hence TPS, which can be used to obtain desired time from ticks
+	//GetTime Nanosecond doesn't work on all hardware hence TPS, which can be used to obtain desired time from ticks
 	tick = rdtsc();
 	uefi_call_wrapper(BS->Stall, 1, 1000000);
 	uint64_t TPS = rdtsc()-tick;
