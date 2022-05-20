@@ -88,11 +88,18 @@ int pow_pos(unsigned int base, unsigned int exponent){
 EFI_STATUS
 EFIAPI
 efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
+	INTN Argc;
 	CHAR16 **Argv;
 	EFI_TIME* time = NULL;
 	
 	InitializeLib(ImageHandle, SystemTable);
-	GetShellArgcArgv(ImageHandle, &Argv);
+	Argc = GetShellArgcArgv(ImageHandle, &Argv);
+	//check if there's an argument, otherwise program hangs
+	if(Argc == 1){
+		Print(L"No argument\n");
+		return EFI_SUCCESS;
+	}
+	
 	
 	uefi_call_wrapper(ST->ConOut->ClearScreen, 1, ST->ConOut);
 	uint64_t tick;
@@ -101,6 +108,13 @@ efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 	
 	UINTN inputsize;
 	for(inputsize = 0; Argv[1][inputsize] != '\0'; ++inputsize);
+	//check if input is numeric
+	for(int i = 0; i<inputsize; ++i){
+		if((int)Argv[1][i]>57 && (int)Argv[1][i]<48){
+			Print(L"Provided argument is not numeric\n");
+			return EFI_SUCCESS;
+		}
+	}
 	
 	UINTN size = 0;
 	for(int i = inputsize-1; i>=0; --i){
@@ -140,6 +154,10 @@ efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 	tick = rdtsc();
 	quicksort(arr, size);
 	Print(L"Quicksort ticks: %lu\n", rdtsc()-tick);
+	
+	Print(L"\nHit any key to exit\n");
+	WaitForSingleEvent(ST->ConIn->WaitForKey, 0);
+	uefi_call_wrapper(ST->ConOut->OutputString, 2, ST->ConOut, L"\n");
 	
 	return EFI_SUCCESS;
 }
