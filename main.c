@@ -110,7 +110,7 @@ efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 	for(inputsize = 0; Argv[1][inputsize] != '\0'; ++inputsize);
 	//check if input is numeric
 	for(int i = 0; i<inputsize; ++i){
-		if((int)Argv[1][i]>57 && (int)Argv[1][i]<48){
+		if((int)Argv[1][i]>57 || (int)Argv[1][i]<48){
 			Print(L"Provided argument is not numeric\n");
 			return EFI_SUCCESS;
 		}
